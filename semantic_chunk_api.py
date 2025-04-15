@@ -19,6 +19,20 @@ chunker = SemanticChunker(embeddings=embed_model, breakpoint_threshold_type="per
 
 @app.post("/chunk")
 async def chunk_text(request: Request):
-    data = await request.json()
-    docs = chunker.create_documents([data["text"]])
-    return [{"content": d.page_content} for d in docs]
+    try:
+        data = await request.json()
+        text = data.get("text", "")
+        
+        if not text.strip():
+            return {"error": "No text provided"}
+
+        print(f"Received text length: {len(text)}")
+
+        docs = chunker.create_documents([text])
+        return [{"content": d.page_content} for d in docs]
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e)}
+
